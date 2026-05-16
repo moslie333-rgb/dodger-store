@@ -1,0 +1,231 @@
+@import "tailwindcss";
+
+@theme {
+  --font-alexandria: "Alexandria", sans-serif;
+  
+  --color-accent: #d4af37;
+  --color-accent-dark: #b8962d;
+  
+  /* Mapped Adaptive Theme Tokens */
+  --color-background: var(--bg-page);
+  --color-background-secondary: var(--bg-secondary);
+  --color-background-card-dark: var(--bg-surface);
+  --color-surface: var(--bg-surface);
+  
+  --color-primary: var(--text-primary);
+  --color-primary-light: var(--text-secondary);
+  
+  --color-border-subtle: var(--border-soft);
+  
+  --shadow-premium: var(--shadow-premium);
+  --shadow-soft: var(--shadow-soft);
+
+  --animate-float: float 6s ease-in-out infinite;
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+  }
+}
+
+@layer base {
+  :root {
+    /* Light Mode: Elegant SaaS */
+    --bg-page: #faf9f8; /* Slightly warm white */
+    --bg-secondary: #f3f4f6;
+    --bg-surface: #ffffff;
+    --bg-glass: rgba(255, 255, 255, 0.7);
+    
+    --text-primary: #1f2937;
+    --text-secondary: #6b7280;
+    
+    --border-soft: rgba(0, 0, 0, 0.06);
+    --border-glass: rgba(255, 255, 255, 0.3);
+    
+    --shadow-soft: 0 4px 20px -2px rgba(0, 0, 0, 0.04);
+    --shadow-premium: 0 12px 40px -10px rgba(0, 0, 0, 0.08);
+  }
+
+  [data-theme="dark"] {
+    /* Dark Mode: Deep Navy / Charcoal Cinematic */
+    --bg-page: #0a0e17;
+    --bg-secondary: #0d121c; 
+    --bg-surface: #131824;
+    --bg-glass: rgba(19, 24, 36, 0.7);
+    
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    
+    --border-soft: rgba(255, 255, 255, 0.06);
+    --border-glass: rgba(255, 255, 255, 0.08);
+    
+    --shadow-soft: 0 4px 24px -2px rgba(0, 0, 0, 0.4);
+    --shadow-premium: 0 20px 40px -10px rgba(0, 0, 0, 0.6);
+  }
+
+  body {
+    @apply font-alexandria antialiased overflow-x-hidden transition-colors duration-500;
+    direction: rtl;
+    background-color: var(--bg-page);
+    color: var(--text-primary);
+  }
+}
+
+@layer utilities {
+  /* Force adaptive surfaces for existing utility classes to keep JSX clean */
+  .bg-white,
+  .dark\:bg-\[\#121212\]:is([data-theme="dark"] *),
+  .dark\:bg-background-card-dark:is([data-theme="dark"] *) {
+    background-color: var(--bg-surface) !important;
+  }
+
+  .bg-\[\#121212\],
+  .dark\:bg-white:is([data-theme="dark"] *) {
+    background-color: var(--text-primary) !important;
+    color: var(--bg-page) !important;
+  }
+  
+  .border-black\/5,
+  .dark\:border-white\/5:is([data-theme="dark"] *) {
+    border-color: var(--border-soft) !important;
+  }
+}
+
+@layer utilities {
+  /* Brand Glow Tokens */
+  .glow-tod {
+    --brand-glow: rgba(212, 175, 55, 0.15);
+    --brand-glow-subtle: rgba(212, 175, 55, 0.05);
+  }
+  [data-theme="dark"] .glow-tod {
+    --brand-glow: rgba(212, 175, 55, 0.35);
+    --brand-glow-subtle: rgba(212, 175, 55, 0.15);
+  }
+  
+  .glow-bein {
+    --brand-glow: rgba(106, 43, 134, 0.15);
+    --brand-glow-subtle: rgba(106, 43, 134, 0.05);
+  }
+  [data-theme="dark"] .glow-bein {
+    --brand-glow: rgba(168, 85, 247, 0.3); /* slightly brighter purple for dark mode */
+    --brand-glow-subtle: rgba(168, 85, 247, 0.1);
+  }
+
+  .text-glow {
+    text-shadow: 0 2px 10px rgba(168, 85, 247, 0.25);
+    transition: text-shadow 0.3s ease;
+  }
+  
+  .dark .text-glow {
+    text-shadow: 0 0 15px rgba(168, 85, 247, 0.5);
+  }
+  
+  .hover-text-glow:hover {
+    text-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
+  }
+
+  .dark .hover-text-glow:hover {
+    text-shadow: 0 0 25px rgba(168, 85, 247, 0.7);
+  }
+}
+
+@layer components {
+  .btn-premium {
+    @apply inline-flex items-center justify-center px-8 py-4 rounded-full font-semibold transition-all duration-300 active:scale-95;
+    box-shadow: var(--shadow-soft);
+  }
+  .btn-premium:hover {
+    box-shadow: 0 10px 30px -10px rgba(168, 85, 247, 0.5);
+    transform: translateY(-2px);
+  }
+  
+  .glass {
+    background-color: var(--bg-glass);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-glass);
+    box-shadow: var(--shadow-soft);
+    @apply transition-colors duration-500;
+  }
+
+  .card-premium {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-soft);
+    box-shadow: var(--shadow-soft);
+    @apply rounded-[30px] transition-all duration-500;
+  }
+  
+  .card-premium:hover {
+    box-shadow: var(--shadow-premium);
+    transform: translateY(-4px);
+  }
+
+  /* Premium Cinematic Glow System - Soft Purple / Violet Border */
+  .cinematic-video-frame {
+    position: relative;
+    border-radius: 45px;
+    z-index: 1;
+    transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+    box-shadow: var(--shadow-premium);
+  }
+  
+  /* Glowing Border Layer */
+  .cinematic-video-frame::before {
+    content: '';
+    position: absolute;
+    inset: -2px; /* Border thickness */
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.8), rgba(217, 70, 239, 0.5), rgba(107, 33, 168, 0.9));
+    background-size: 200% 200%;
+    border-radius: inherit;
+    z-index: -1;
+    animation: purple-glow-move 6s ease-in-out infinite alternate;
+  }
+  
+  /* Outer Soft Ambient Glow Layer */
+  .cinematic-video-frame::after {
+    content: '';
+    position: absolute;
+    inset: -15px;
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.4), rgba(217, 70, 239, 0.2), rgba(107, 33, 168, 0.5));
+    background-size: 200% 200%;
+    border-radius: inherit;
+    z-index: -2;
+    filter: blur(20px);
+    opacity: 0.6;
+    animation: purple-glow-move 8s ease-in-out infinite alternate-reverse;
+    transition: all 0.6s ease;
+  }
+
+  .cinematic-video-frame:hover {
+    transform: translateY(-5px);
+  }
+  
+  .cinematic-video-frame:hover::after {
+    opacity: 1;
+    inset: -25px;
+    filter: blur(25px);
+  }
+}
+
+@keyframes purple-glow-move {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(212, 175, 55, 0.3);
+  border-radius: 9999px;
+  transition: background-color 0.3s;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(212, 175, 55, 0.6);
+}

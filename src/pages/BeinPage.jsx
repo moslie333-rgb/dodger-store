@@ -159,32 +159,6 @@ const BeinPage = () => {
         </div>
       </section>
 
-      {/* Pricing Section - New Devices */}
-      <section id="plans" className="py-24 md:py-32 bg-background-secondary">
-        <div className="container mx-auto px-6 text-center mb-16 md:mb-20">
-          <h2 className="text-4xl md:text-6xl font-black mb-6 text-glow">{getContent('bein_plans_new_title', 'أجهزة beIN SPORTS الجديدة')}</h2>
-          <p className="text-xl text-primary-light max-w-2xl mx-auto">{getContent('bein_plans_new_desc', 'اختر جهازك المفضل مع باقة اشتراك تناسب احتياجاتك.')}</p>
-        </div>
-        <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-          {groupedPlans.new.map((plan) => (
-            <PricingCard key={plan.id} plan={plan} type="new" getContent={getContent} />
-          ))}
-        </div>
-      </section>
-
-      {/* Pricing Section - Renewal */}
-      <section className="py-24 md:py-32 px-6">
-        <div className="container mx-auto text-center mb-16 md:mb-20">
-          <h2 className="text-4xl md:text-6xl font-black mb-6 text-glow">{getContent('bein_plans_renew_title', 'تجديد اشتراك beIN الحالي')}</h2>
-          <p className="text-xl text-primary-light max-w-2xl mx-auto">{getContent('bein_plans_renew_desc', 'قم بتجديد اشتراكك الحالي بسهولة وبأفضل الأسعار.')}</p>
-        </div>
-        <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-          {groupedPlans.renewal.map((plan) => (
-            <PricingCard key={plan.id} plan={plan} type="renewal" getContent={getContent} />
-          ))}
-        </div>
-      </section>
-
       {/* Features Section */}
       <section className="py-32 bg-background-secondary">
         <div className="container mx-auto px-6 text-center mb-20">

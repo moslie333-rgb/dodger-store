@@ -84,10 +84,35 @@ const BeinPage = () => {
 
   const groupedPlans = useMemo(() => {
     const newPlans = data.plans.filter(p => p.category === 'BEIN_NEW');
-    const groupedNew = Array.from(new Set(newPlans.map(p => p.plan_name))).map(name => {
-      const items = newPlans.filter(p => p.plan_name === name);
-      return { id: items[0].id, name: name, is_popular: items.some(p => p.highlighted), prices: items.map(p => ({ label: p.duration, price: p.price, old_price: p.old_price })) };
+
+    // Build a map: plan_name -> card object, preserving sort_order
+    const planMap = {};
+    newPlans.forEach(p => {
+      if (!planMap[p.plan_name]) {
+        planMap[p.plan_name] = {
+          id: p.id,
+          name: p.plan_name,
+          sort_order: p.sort_order ?? 999,
+          is_popular: false,
+          prices: []
+        };
+      }
+      planMap[p.plan_name].is_popular = planMap[p.plan_name].is_popular || !!p.highlighted;
+      planMap[p.plan_name].prices.push({ label: p.duration, price: p.price, old_price: p.old_price, sort_order: p.sort_order ?? 999 });
     });
+
+    // Sort prices within each card by sort_order
+    Object.values(planMap).forEach(card => {
+      card.prices.sort((a, b) => a.sort_order - b.sort_order);
+    });
+
+    const allCards = Object.values(planMap).sort((a, b) => a.sort_order - b.sort_order);
+
+    // Split into ULTIMATE and PREMIUM groups by plan_name keyword
+    const ultimate = allCards.filter(c => c.name.toUpperCase().includes('ULTIMATE'));
+    const premium  = allCards.filter(c => c.name.toUpperCase().includes('PREMIUM'));
+    // Fallback: any card that doesn't match either goes to premium
+    const other    = allCards.filter(c => !c.name.toUpperCase().includes('ULTIMATE') && !c.name.toUpperCase().includes('PREMIUM'));
 
     const renewalPlans = data.plans.filter(p => p.category === 'BEIN_RENEWAL');
     const groupedRenewal = Array.from(new Set(renewalPlans.map(p => p.plan_name))).map(name => {
@@ -95,10 +120,10 @@ const BeinPage = () => {
       return { id: items[0].id, name: name, is_popular: items.some(p => p.highlighted), prices: items.map(p => ({ label: p.duration, price: p.price, old_price: p.old_price })) };
     });
 
-    return { new: groupedNew, renewal: groupedRenewal };
+    return { ultimate, premium: [...premium, ...other], renewal: groupedRenewal };
   }, [data.plans]);
 
-  const { new: beinPlans, renewal: beinRenewalPlans } = groupedPlans;
+  const { ultimate: beinUltimatePlans, premium: beinPremiumPlans, renewal: beinRenewalPlans } = groupedPlans;
 
   const getContent = useCallback((key, fallback) => {
     const item = data.content.find(c => c.key === key);
@@ -192,6 +217,8 @@ const BeinPage = () => {
       {/* SECTION 1 — شراء الجهاز + الاشتراك */}
       <section className="py-24 md:py-32 bg-background">
         <div className="container mx-auto px-6">
+
+          {/* Section Title */}
           <div className="flex items-center gap-4 mb-16">
             <div className="w-12 h-12 bg-[#6A2B86]/10 rounded-xl flex items-center justify-center text-[#6A2B86]">
               <Box size={28} />
@@ -199,30 +226,74 @@ const BeinPage = () => {
             <h2 className="text-3xl md:text-5xl font-black text-glow">{getContent('bein_new_title', 'اشتراك beIN + الجهاز')}</h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
-            {beinPlans.map((plan, index) => (
-              <motion.div key={plan.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.1 }} className={`card-premium p-10 flex flex-col ${plan.is_popular ? 'border-2 border-[#6A2B86]/20 shadow-2xl relative overflow-hidden' : ''}`}>
-                {plan.is_popular && (
-                  <div className="absolute top-4 left-4 bg-[#6A2B86] text-white px-4 py-1 rounded-full text-sm font-bold">{getContent('bein_popular_badge', 'الأكثر طلباً')}</div>
-                )}
-                <h3 className="text-2xl font-black mb-8 p-4 bg-[#6A2B86]/5 rounded-2xl text-center">{plan.name}</h3>
-                <div className="space-y-4 mb-12 flex-grow">
-                  {(plan.prices || []).map((item, i) => (
-                    <div key={i} className="flex justify-between items-center border-b border-black/5 dark:border-white/5 pb-4 last:border-0 last:pb-0">
-                      <span className="opacity-70 text-xl">{item.label}</span>
-                      <div className="flex flex-col text-left">
-                        {item.old_price && <span className="text-sm line-through opacity-50">{item.old_price}</span>}
-                        <span className="font-bold text-[#6A2B86] text-glow text-2xl">{item.price}</span>
-                      </div>
+          {/* ULTIMATE Group */}
+          {beinUltimatePlans.length > 0 && (
+            <div className="mb-16">
+              <div className="flex items-center gap-3 mb-8">
+                <span className="w-2 h-8 rounded-full bg-accent inline-block" />
+                <h3 className="text-2xl md:text-3xl font-black text-accent tracking-wide">ULTIMATE</h3>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                {beinUltimatePlans.map((plan, index) => (
+                  <motion.div key={plan.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.1 }} className={`card-premium p-10 flex flex-col ${plan.is_popular ? 'border-2 border-[#6A2B86]/20 shadow-2xl relative overflow-hidden' : ''}`}>
+                    {plan.is_popular && (
+                      <div className="absolute top-4 left-4 bg-[#6A2B86] text-white px-4 py-1 rounded-full text-sm font-bold">{getContent('bein_popular_badge', 'الأكثر طلباً')}</div>
+                    )}
+                    <h3 className="text-2xl font-black mb-8 p-4 bg-[#6A2B86]/5 rounded-2xl text-center">{plan.name}</h3>
+                    <div className="space-y-4 mb-12 flex-grow">
+                      {(plan.prices || []).map((item, i) => (
+                        <div key={i} className="flex justify-between items-center border-b border-black/5 dark:border-white/5 pb-4 last:border-0 last:pb-0">
+                          <span className="opacity-70 text-xl">{item.label}</span>
+                          <div className="flex flex-col text-left">
+                            {item.old_price && <span className="text-sm line-through opacity-50">{item.old_price}</span>}
+                            <span className="font-bold text-[#6A2B86] text-glow text-2xl">{item.price}</span>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-                <a href="https://wa.me/96898911606" className={`btn-premium bg-[#6A2B86] text-white w-full text-xl hover:scale-105 ${plan.is_popular ? 'shadow-xl shadow-[#6A2B86]/20' : ''}`}>
-                  {getContent('bein_new_btn', 'اشترك الآن')}
-                </a>
-              </motion.div>
-            ))}
-          </div>
+                    <a href="https://wa.me/96898911606" className={`btn-premium bg-[#6A2B86] text-white w-full text-xl hover:scale-105 ${plan.is_popular ? 'shadow-xl shadow-[#6A2B86]/20' : ''}`}>
+                      {getContent('bein_new_btn', 'اشترك الآن')}
+                    </a>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* PREMIUM Group */}
+          {beinPremiumPlans.length > 0 && (
+            <div>
+              <div className="flex items-center gap-3 mb-8">
+                <span className="w-2 h-8 rounded-full bg-[#6A2B86] inline-block" />
+                <h3 className="text-2xl md:text-3xl font-black text-[#6A2B86] tracking-wide">PREMIUM</h3>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                {beinPremiumPlans.map((plan, index) => (
+                  <motion.div key={plan.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.1 }} className={`card-premium p-10 flex flex-col ${plan.is_popular ? 'border-2 border-[#6A2B86]/20 shadow-2xl relative overflow-hidden' : ''}`}>
+                    {plan.is_popular && (
+                      <div className="absolute top-4 left-4 bg-[#6A2B86] text-white px-4 py-1 rounded-full text-sm font-bold">{getContent('bein_popular_badge', 'الأكثر طلباً')}</div>
+                    )}
+                    <h3 className="text-2xl font-black mb-8 p-4 bg-[#6A2B86]/5 rounded-2xl text-center">{plan.name}</h3>
+                    <div className="space-y-4 mb-12 flex-grow">
+                      {(plan.prices || []).map((item, i) => (
+                        <div key={i} className="flex justify-between items-center border-b border-black/5 dark:border-white/5 pb-4 last:border-0 last:pb-0">
+                          <span className="opacity-70 text-xl">{item.label}</span>
+                          <div className="flex flex-col text-left">
+                            {item.old_price && <span className="text-sm line-through opacity-50">{item.old_price}</span>}
+                            <span className="font-bold text-[#6A2B86] text-glow text-2xl">{item.price}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <a href="https://wa.me/96898911606" className={`btn-premium bg-[#6A2B86] text-white w-full text-xl hover:scale-105 ${plan.is_popular ? 'shadow-xl shadow-[#6A2B86]/20' : ''}`}>
+                      {getContent('bein_new_btn', 'اشترك الآن')}
+                    </a>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          )}
+
         </div>
       </section>
 

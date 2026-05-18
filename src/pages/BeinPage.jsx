@@ -101,9 +101,25 @@ const BeinPage = () => {
       planMap[p.plan_name].prices.push({ label: p.duration, price: p.price, old_price: p.old_price, sort_order: p.sort_order ?? 999 });
     });
 
-    // Sort prices within each card by sort_order
+    // Sort prices within each card by sort_order, then by duration if sort_order is the same
     Object.values(planMap).forEach(card => {
-      card.prices.sort((a, b) => a.sort_order - b.sort_order);
+      card.prices.sort((a, b) => {
+        if (a.sort_order !== b.sort_order) {
+          return a.sort_order - b.sort_order;
+        }
+        const getMonths = (label) => {
+          if (!label) return 999;
+          const clean = label.trim().toUpperCase();
+          if (/سنة|YEAR/.test(clean)) return 12;
+          if (/شهر|شهور|أشهر|MONTH/.test(clean)) {
+            const m = clean.match(/(\d+)/);
+            return m ? parseInt(m[1], 10) : 1;
+          }
+          const m = clean.match(/(\d+)/);
+          return m ? parseInt(m[1], 10) : 999;
+        };
+        return getMonths(a.label) - getMonths(b.label);
+      });
     });
 
     const allCards = Object.values(planMap).sort((a, b) => a.sort_order - b.sort_order);
@@ -113,6 +129,19 @@ const BeinPage = () => {
     const premium  = allCards.filter(c => c.name.toUpperCase().includes('PREMIUM'));
     // Fallback: any card that doesn't match either goes to premium
     const other    = allCards.filter(c => !c.name.toUpperCase().includes('ULTIMATE') && !c.name.toUpperCase().includes('PREMIUM'));
+
+    // Sort each group by duration: 3 months → 6 months → 1 year
+    const getDurationMonths = (name) => {
+      const n = name.toUpperCase();
+      if (/1\s*YEAR|\bYEAR\b|سنة/.test(n)) return 12;
+      const m = n.match(/(\d+)\s*(MONTH|شهر|أشهر)/);
+      if (m) return parseInt(m[1], 10);
+      const num = n.match(/\d+/);
+      return num ? parseInt(num[0], 10) : 999;
+    };
+    ultimate.sort((a, b) => getDurationMonths(a.name) - getDurationMonths(b.name));
+    premium.sort((a, b)  => getDurationMonths(a.name) - getDurationMonths(b.name));
+    other.sort((a, b)    => getDurationMonths(a.name) - getDurationMonths(b.name));
 
     const renewalPlans = data.plans.filter(p => p.category === 'BEIN_RENEWAL');
     const groupedRenewal = Array.from(new Set(renewalPlans.map(p => p.plan_name))).map(name => {

@@ -223,7 +223,7 @@ const TODPage = () => {
             <p className="text-xl text-primary-light max-w-2xl mx-auto font-medium">{getContent('tod_pricing_desc', 'استمتع بأقوى البطولات بجودة ممتازة ودعم متواصل')}</p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch max-w-7xl mx-auto mb-20">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8 items-stretch max-w-7xl mx-auto mb-20">
             {/* PLAN 1 — TOD Mobile */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -322,6 +322,58 @@ const TODPage = () => {
 
               <a href="https://wa.me/96898911606" className="btn-premium bg-[#121212] dark:bg-white text-white dark:text-[#121212] w-full text-xl hover:scale-105">
                 {getContent('tod_p3_btn', 'ابدأ الاشتراك')}
+              </a>
+            </motion.div>
+
+            {/* PLAN 4 — World Cup + 1 Year Entertainment Package */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="card-premium p-10 flex flex-col bg-white dark:bg-[#121212] border-black/5 dark:border-white/5 group relative overflow-hidden"
+            >
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-accent text-white px-6 py-2 rounded-full font-bold text-sm uppercase tracking-widest whitespace-nowrap shadow-xl">
+                عرض لفترة محدودة
+              </div>
+
+              <div className="mb-8">
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 bg-accent/10 text-accent group-hover:scale-110 transition-transform">
+                  <Trophy size={32} />
+                </div>
+                <h3 className="text-2xl font-black mb-2 flex items-center gap-2">
+                  <span>باقة كأس العالم + سنة ترفيه</span>
+                  <span>🏆</span>
+                </h3>
+                <p className="text-primary-light">World Cup + 1 Year Entertainment</p>
+              </div>
+
+              <div className="bg-background-secondary dark:bg-white/5 rounded-3xl p-6 mb-8 flex-grow flex flex-col justify-between">
+                <div className="space-y-4 mb-4">
+                  {[
+                    'مشاهدة بطولة كأس العالم FIFA',
+                    'اشتراك ترفيهي كامل لمدة سنة',
+                    'تسجيل حتى 5 أجهزة',
+                    'مشاهدة متزامنة على جهازين',
+                    'تفعيل رسمي عبر إيميلك أو رقمك',
+                    'يتم إرسال قسيمة للتفعيل الذاتي'
+                  ].map((feat, i) => (
+                    <div key={i} className="flex items-center gap-2 text-sm">
+                      <CheckCircle size={16} className="text-accent flex-shrink-0" />
+                      <span className="opacity-90">{feat}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="text-center py-4 border-t border-black/5 dark:border-white/10 mt-auto">
+                  <div className="text-sm opacity-60 mb-2 font-bold">السعر</div>
+                  <div className="text-5xl font-black text-accent text-glow">25 SAR</div>
+                </div>
+              </div>
+
+              <a 
+                href="https://wa.me/96898911606?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D9%8B%20Dodger%20Store%D8%8C%20%D8%A3%D8%B1%D8%BA%D8%A8%20%D9%81%D9%8A%20%D8%A7%D9%84%D8%A7%D8%B4%D8%AA%D8%B1%D8%A7%D9%83%20%D8%A8%D9%80%3A%0A%D8%A7%D9%84%D8%A8%D8%A7%D9%82%D8%A9%3A%20%D8%A8%D8%A7%D9%82%D8%A9%20%D9%83%D8%A3%D8%B3%20%D8%A7%D9%84%D8%B9%D8%A7%D9%84%D9%85%20%2B%20%D8%B3%D9%86%D8%A9%20%D8%AA%D8%B1%D9%81%D9%8A%D9%87%20%F0%9F%8F%86%0A%D8%A7%D9%84%D8%B3%D8%B5%D8%B1%3A%2025%20SAR" 
+                className="btn-premium bg-[#121212] dark:bg-white text-white dark:text-[#121212] w-full text-xl hover:scale-105"
+              >
+                تواصل للاشتراك
               </a>
             </motion.div>
           </div>

@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Sun, Moon, MessageCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../lib/supabase';
+import { useCurrency } from '../context/CurrencyContext';
 import logo from '../assets/logo.png';
 
 const Navbar = () => {
@@ -11,6 +12,7 @@ const Navbar = () => {
   const [theme, setTheme] = useState(localStorage.getItem('dodger_theme') || 'light');
   const [content, setContent] = useState([]);
   const location = useLocation();
+  const { getGeneralWhatsAppLink } = useCurrency();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -91,7 +93,7 @@ const Navbar = () => {
           </button>
           
           <a
-            href="https://wa.me/96898911606"
+            href={getGeneralWhatsAppLink()}
             target="_blank"
             rel="noopener noreferrer"
             className="hidden md:flex items-center gap-2 bg-accent text-white px-6 py-3 rounded-full font-bold hover:bg-accent-dark transition-all duration-300 shadow-lg shadow-accent/20 active:scale-95"
@@ -130,7 +132,7 @@ const Navbar = () => {
                 </Link>
               ))}
               <a
-                href="https://wa.me/96898911606"
+                href={getGeneralWhatsAppLink()}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 bg-accent text-white p-4 rounded-2xl font-bold shadow-lg"

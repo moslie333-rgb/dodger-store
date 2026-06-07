@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { MessageCircle, Camera, SendHorizontal } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { useCurrency } from '../context/CurrencyContext';
 import logo from '../assets/logo.png';
 
 const Footer = () => {
   const [content, setContent] = useState([]);
+  const { getGeneralWhatsAppLink } = useCurrency();
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -44,7 +46,7 @@ const Footer = () => {
 
           <div className="flex gap-6 mb-12">
             {[
-              { icon: <MessageCircle size={24} />, link: 'https://wa.me/96898911606' },
+              { icon: <MessageCircle size={24} />, link: getGeneralWhatsAppLink() },
               { icon: <Camera size={24} />, link: '#' },
               { icon: <SendHorizontal size={24} />, link: '#' },
             ].map((social, i) => (

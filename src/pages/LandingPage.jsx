@@ -11,22 +11,22 @@ const LandingPage = () => {
   const [content, setContent] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchContent = useCallback(async () => {
-    try {
-      const { data } = await supabase.from('site_content').select('*').in('page', ['home', 'common']);
-      if (data) setContent(data);
-    } catch (err) {
-      console.error('[LandingPage] Fetch error:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
+    const fetchContent = async () => {
+      try {
+        const { data } = await supabase.from('site_content').select('*').in('page', ['home', 'common']);
+        if (data) setContent(data);
+      } catch (err) {
+        console.error('[LandingPage] Fetch error:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchContent();
     const channel = supabase.channel('site_content_home').on('postgres_changes', { event: '*', schema: 'public', table: 'site_content' }, fetchContent).subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [fetchContent]);
+  }, []);
 
   const getContent = useCallback((key, fallback) => {
     const item = content.find(c => c.key === key);

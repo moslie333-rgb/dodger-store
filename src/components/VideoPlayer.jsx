@@ -1,40 +1,40 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { Play } from 'lucide-react';
+
+// Fallback Placeholder Component (Premium Gradient)
+const Fallback = ({ className }) => (
+  <div className={`w-full h-full bg-[#0a0a0a] flex items-center justify-center overflow-hidden relative ${className}`}>
+    <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent animate-pulse" />
+    <div className="w-12 h-12 border border-white/5 rounded-full flex items-center justify-center animate-pulse">
+      <div className="w-1.5 h-1.5 bg-accent/20 rounded-full" />
+    </div>
+  </div>
+);
+
+// Minimal Premium Play Button Overlay
+const PlayOverlay = ({ onStart }) => (
+  <div 
+    className="absolute inset-0 z-30 flex items-center justify-center bg-black/30 backdrop-blur-[2px] cursor-pointer group transition-all duration-700 hover:bg-black/10"
+    onClick={(e) => {
+      e.stopPropagation();
+      onStart();
+    }}
+  >
+    <div className="w-16 h-16 bg-white/10 backdrop-blur-2xl rounded-full flex items-center justify-center border border-white/20 shadow-[0_0_30px_rgba(255,255,255,0.1)] group-hover:scale-110 group-hover:bg-white/20 group-hover:border-white/40 transition-all duration-500 ease-out">
+      <Play size={28} fill="white" className="text-white ml-1 drop-shadow-lg" />
+    </div>
+  </div>
+);
 
 const VideoPlayer = ({ url, className }) => {
   const [isStarted, setIsStarted] = useState(false);
-
-  // Fallback Placeholder Component (Premium Gradient)
-  const Fallback = () => (
-    <div className={`w-full h-full bg-[#0a0a0a] flex items-center justify-center overflow-hidden relative ${className}`}>
-      <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent animate-pulse" />
-      <div className="w-12 h-12 border border-white/5 rounded-full flex items-center justify-center animate-pulse">
-        <div className="w-1.5 h-1.5 bg-accent/20 rounded-full" />
-      </div>
-    </div>
-  );
-
-  // Minimal Premium Play Button Overlay
-  const PlayOverlay = () => (
-    <div 
-      className="absolute inset-0 z-30 flex items-center justify-center bg-black/30 backdrop-blur-[2px] cursor-pointer group transition-all duration-700 hover:bg-black/10"
-      onClick={(e) => {
-        e.stopPropagation();
-        setIsStarted(true);
-      }}
-    >
-      <div className="w-16 h-16 bg-white/10 backdrop-blur-2xl rounded-full flex items-center justify-center border border-white/20 shadow-[0_0_30px_rgba(255,255,255,0.1)] group-hover:scale-110 group-hover:bg-white/20 group-hover:border-white/40 transition-all duration-500 ease-out">
-        <Play size={28} fill="white" className="text-white ml-1 drop-shadow-lg" />
-      </div>
-    </div>
-  );
 
   // Robust parsing using useMemo for performance
   const videoData = useMemo(() => {
     if (!url) return null;
 
     // YouTube logic
-    const ytRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
+    const ytRegex = /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/i;
     const ytMatch = url.match(ytRegex);
     if (ytMatch && ytMatch[1]) {
       return { type: 'youtube', id: ytMatch[1] };
@@ -51,11 +51,11 @@ const VideoPlayer = ({ url, className }) => {
     return { type: 'direct', url: url };
   }, [url]);
 
-  if (!videoData || !url) return <Fallback />;
+  if (!videoData || !url) return <Fallback className={className} />;
 
   return (
     <div className={`relative overflow-hidden select-none bg-black rounded-[inherit] ${className}`}>
-      {!isStarted && <PlayOverlay />}
+      {!isStarted && <PlayOverlay onStart={() => setIsStarted(true)} />}
       
       <div className="w-full h-full relative">
         {videoData.type === 'youtube' && (
@@ -92,7 +92,7 @@ const VideoPlayer = ({ url, className }) => {
                 title="Vimeo Video"
               />
             ) : (
-              <Fallback />
+              <Fallback className={className} />
             )}
           </>
         )}

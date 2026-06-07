@@ -1,6 +1,7 @@
 import { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
+import { CurrencyProvider } from './context/CurrencyContext';
 import FloatingWhatsApp from './components/FloatingWhatsApp';
 import ScrollToTop from './components/ScrollToTop';
 
@@ -18,20 +19,22 @@ const LoadingFallback = () => (
 
 function App() {
   return (
-    <Router>
-      <ScrollToTop />
-      <FloatingWhatsApp />
-      <Suspense fallback={<LoadingFallback />}>
-        <AnimatePresence mode="wait">
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/tod" element={<TODPage />} />
-            <Route path="/bein" element={<BeinPage />} />
-            <Route path="/admin" element={<AdminDashboard />} />
-          </Routes>
-        </AnimatePresence>
-      </Suspense>
-    </Router>
+    <CurrencyProvider>
+      <Router>
+        <ScrollToTop />
+        <FloatingWhatsApp />
+        <Suspense fallback={<LoadingFallback />}>
+          <AnimatePresence mode="wait">
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/tod" element={<TODPage />} />
+              <Route path="/bein" element={<BeinPage />} />
+              <Route path="/admin" element={<AdminDashboard />} />
+            </Routes>
+          </AnimatePresence>
+        </Suspense>
+      </Router>
+    </CurrencyProvider>
   );
 }
 

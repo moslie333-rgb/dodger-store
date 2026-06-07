@@ -1,10 +1,13 @@
 import { MessageCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useCurrency } from '../context/CurrencyContext';
 
 const FloatingWhatsApp = () => {
+  const { getGeneralWhatsAppLink } = useCurrency();
+
   return (
     <motion.a
-      href="https://wa.me/96898911606"
+      href={getGeneralWhatsAppLink()}
       target="_blank"
       rel="noopener noreferrer"
       initial={{ opacity: 0, scale: 0 }}

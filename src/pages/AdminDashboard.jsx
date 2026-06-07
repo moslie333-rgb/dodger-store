@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
+/* eslint-disable react-hooks/set-state-in-effect */
+import { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../lib/supabase';
-import { LogOut, Plus, Trash2, Save, X, Upload, LayoutGrid, Video, CheckCircle, Box, RefreshCw, Settings, FileText } from 'lucide-react';
+import { LogOut, Plus, Trash2, X, Upload, LayoutGrid, Video, CheckCircle, Box, RefreshCw, Settings, FileText } from 'lucide-react';
 
 // --- Sub-components (Memoized for Performance) ---
 
@@ -232,7 +233,7 @@ const AdminDashboard = () => {
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
       
-      const { data, error } = await supabase.storage.from(bucket).upload(fileName, file, {
+      const { error } = await supabase.storage.from(bucket).upload(fileName, file, {
         cacheControl: '3600',
         upsert: false
       });

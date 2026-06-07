@@ -1,82 +1,42 @@
-import { useState, useEffect, useMemo, useCallback, memo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { motion } from 'framer-motion';
 import { Tv, Trophy, Zap, MessageCircle, Check, Box, RefreshCw, Info, HelpCircle } from 'lucide-react';
+import { useCurrency } from '../context/CurrencyContext';
+import PriceDisplay from '../components/PriceDisplay';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import FAQAccordion from '../components/FAQAccordion';
 import VideoReviewsSlider from '../components/VideoReviewsSlider';
 import VideoPlayer from '../components/VideoPlayer';
 
-// Memoized Pricing Card for performance
-const PricingCard = memo(({ plan, type, getContent }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true }}
-    className={`card-premium p-10 flex flex-col ${plan.is_popular ? 'bg-[#6A2B86] text-white border-purple-500/30' : 'bg-white dark:bg-[#121212]'} relative group h-full`}
-  >
-    {plan.is_popular && (
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-accent text-white px-6 py-2 rounded-full font-bold text-sm uppercase tracking-widest shadow-xl">
-        {getContent('bein_popular_badge', 'الأكثر طلباً')}
-      </div>
-    )}
-
-    <div className="mb-10">
-      <h3 className="text-2xl md:text-3xl font-black mb-3">{plan.name}</h3>
-      <p className={`opacity-70 text-lg ${plan.is_popular ? 'text-white' : 'text-primary-light'}`}>
-        {type === 'new' ? getContent('bein_new_subtitle', 'جهاز جديد + باقة') : getContent('bein_renewal_subtitle', 'تجديد باقة سارية')}
-      </p>
-    </div>
-
-    <div className={`rounded-3xl p-8 mb-10 flex-grow ${plan.is_popular ? 'bg-white/10' : 'bg-background-secondary dark:bg-white/5'}`}>
-      <div className="space-y-6">
-        {plan.prices.map((price, i) => (
-          <div key={i} className="flex justify-between items-center border-b border-white/10 pb-6 last:border-0 last:pb-0">
-            <div className="flex flex-col">
-              <span className="opacity-60 text-sm mb-1">{price.label}</span>
-              <span className="font-bold text-2xl">{price.price}</span>
-            </div>
-            {price.old_price && (
-              <span className="text-lg opacity-40 line-through">{price.old_price}</span>
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
-
-    <a href="https://wa.me/96898911606" className={`btn-premium w-full text-xl py-6 ${plan.is_popular ? 'bg-white text-[#6A2B86]' : 'bg-[#6A2B86] text-white'}`}>
-      {getContent('bein_card_btn', 'تواصل للاشتراك')}
-    </a>
-  </motion.div>
-));
-
 const BeinPage = () => {
   const [data, setData] = useState({ plans: [], content: [], videoUrl: '' });
   const [loading, setLoading] = useState(true);
-
-  const fetchData = async () => {
-    try {
-      const [plansRes, videoRes, contentPageRes, contentCommonRes] = await Promise.all([
-        supabase.from('pricing_plans').select('*').order('group_order', { ascending: true }).order('sort_order', { ascending: true }),
-        supabase.from('site_videos').select('video_url').eq('page_name', 'bein').single(),
-        supabase.from('site_content').select('*').eq('page', 'bein'),
-        supabase.from('site_content').select('*').eq('page', 'common')
-      ]);
-
-      setData({
-        plans: plansRes.data || [],
-        videoUrl: videoRes.data?.video_url || '',
-        content: [...(contentPageRes.data || []), ...(contentCommonRes.data || [])]
-      });
-    } catch (err) {
-      console.error('[BeinPage] Fetch error:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { getWhatsappLink, country } = useCurrency();
 
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [plansRes, videoRes, contentPageRes, contentCommonRes] = await Promise.all([
+          supabase.from('pricing_plans').select('*').order('group_order', { ascending: true }).order('sort_order', { ascending: true }),
+          supabase.from('site_videos').select('video_url').eq('page_name', 'bein').single(),
+          supabase.from('site_content').select('*').eq('page', 'bein'),
+          supabase.from('site_content').select('*').eq('page', 'common')
+        ]);
+
+        setData({
+          plans: plansRes.data || [],
+          videoUrl: videoRes.data?.video_url || '',
+          content: [...(contentPageRes.data || []), ...(contentCommonRes.data || [])]
+        });
+      } catch (err) {
+        console.error('[BeinPage] Fetch error:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchData();
     const channel = supabase.channel('bein_cms_updates').on('postgres_changes', { event: '*', schema: 'public' }, fetchData).subscribe();
     return () => { supabase.removeChannel(channel); };
@@ -188,7 +148,12 @@ const BeinPage = () => {
                 {getContent('bein_hero_desc', 'شاهد الدوري الإنجليزي، دوري أبطال أوروبا، وجميع البطولات الكبرى بدقة عالية مع اشتراك رسمي وتفعيل فوري.')}
               </p>
               <motion.div variants={fadeInUp}>
-                <a href="https://wa.me/96898911606" className="btn-premium bg-[#6A2B86] text-white text-xl shadow-2xl shadow-purple-500/20 hover:scale-105 active:scale-95">
+                <a
+                  href={getWhatsappLink(country)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-premium bg-[#6A2B86] text-white text-xl shadow-2xl shadow-purple-500/20 hover:scale-105 active:scale-95"
+                >
                   {getContent('bein_cta_btn', 'تواصل معنا للاشتراك')}
                 </a>
               </motion.div>
@@ -274,13 +239,20 @@ const BeinPage = () => {
                         <div key={i} className="flex justify-between items-center border-b border-black/5 dark:border-white/5 pb-4 last:border-0 last:pb-0">
                           <span className="opacity-70 text-xl">{item.label}</span>
                           <div className="flex flex-col text-left">
-                            {item.old_price && <span className="text-sm line-through opacity-50">{item.old_price}</span>}
-                            <span className="font-bold text-[#6A2B86] text-glow text-2xl">{item.price}</span>
+                            {item.old_price && (
+                              <PriceDisplay priceString={item.old_price} className="text-sm line-through opacity-50" />
+                            )}
+                            <PriceDisplay priceString={item.price} className="font-bold text-[#6A2B86] text-glow text-2xl" />
                           </div>
                         </div>
                       ))}
                     </div>
-                    <a href="https://wa.me/96898911606" className={`btn-premium bg-[#6A2B86] text-white w-full text-xl hover:scale-105 ${plan.is_popular ? 'shadow-xl shadow-[#6A2B86]/20' : ''}`}>
+                    <a
+                      href={getWhatsappLink(country)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`btn-premium bg-[#6A2B86] text-white w-full text-xl hover:scale-105 ${plan.is_popular ? 'shadow-xl shadow-[#6A2B86]/20' : ''}`}
+                    >
                       {getContent('bein_new_btn', 'اشترك الآن')}
                     </a>
                   </motion.div>
@@ -308,13 +280,20 @@ const BeinPage = () => {
                         <div key={i} className="flex justify-between items-center border-b border-black/5 dark:border-white/5 pb-4 last:border-0 last:pb-0">
                           <span className="opacity-70 text-xl">{item.label}</span>
                           <div className="flex flex-col text-left">
-                            {item.old_price && <span className="text-sm line-through opacity-50">{item.old_price}</span>}
-                            <span className="font-bold text-[#6A2B86] text-glow text-2xl">{item.price}</span>
+                            {item.old_price && (
+                              <PriceDisplay priceString={item.old_price} className="text-sm line-through opacity-50" />
+                            )}
+                            <PriceDisplay priceString={item.price} className="font-bold text-[#6A2B86] text-glow text-2xl" />
                           </div>
                         </div>
                       ))}
                     </div>
-                    <a href="https://wa.me/96898911606" className={`btn-premium bg-[#6A2B86] text-white w-full text-xl hover:scale-105 ${plan.is_popular ? 'shadow-xl shadow-[#6A2B86]/20' : ''}`}>
+                    <a
+                      href={getWhatsappLink(country)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`btn-premium bg-[#6A2B86] text-white w-full text-xl hover:scale-105 ${plan.is_popular ? 'shadow-xl shadow-[#6A2B86]/20' : ''}`}
+                    >
                       {getContent('bein_new_btn', 'اشترك الآن')}
                     </a>
                   </motion.div>
@@ -348,8 +327,10 @@ const BeinPage = () => {
                     <div key={i} className="flex justify-between items-center p-6 bg-background-secondary dark:bg-white/5 rounded-2xl">
                       <span className="text-xl font-bold">{item.label}</span>
                       <div className="flex flex-col text-left">
-                        {item.old_price && <span className="text-sm line-through opacity-50">{item.old_price}</span>}
-                        <span className="text-3xl font-black text-glow text-[#6A2B86]">{item.price}</span>
+                        {item.old_price && (
+                          <PriceDisplay priceString={item.old_price} className="text-sm line-through opacity-50" />
+                        )}
+                        <PriceDisplay priceString={item.price} className="text-3xl font-black text-glow text-[#6A2B86]" />
                       </div>
                     </div>
                   ))}
@@ -431,7 +412,12 @@ const BeinPage = () => {
              </div>
              <div className="space-y-6">
                 <h3 className="text-3xl md:text-4xl font-black text-[#6A2B86]">{getContent('bein_footer_cta', '📩 للتفعيل والتفاصيل تواصل معنا الآن')}</h3>
-                <a href="https://wa.me/96898911606" className="btn-premium bg-[#25D366] text-white px-12 py-6 text-2xl hover:scale-105 shadow-xl shadow-green-500/20">
+                <a
+                  href={getWhatsappLink(country)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-premium bg-[#25D366] text-white px-12 py-6 text-2xl hover:scale-105 shadow-xl shadow-green-500/20"
+                >
                    <MessageCircle className="mr-2" />
                    <span>{getContent('whatsapp_btn_text', 'تواصل عبر واتساب')}</span>
                 </a>
